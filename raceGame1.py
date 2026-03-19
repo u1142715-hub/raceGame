@@ -58,6 +58,7 @@ def main(speed, acceleration):
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
         
+        # Get mouse input for acceleration
         mouse = pygame.mouse.get_pressed() 
         if mouse[0] is True and speed>.9:           
             acceleration = -1    
@@ -65,9 +66,14 @@ def main(speed, acceleration):
             acceleration = 1
         else:
             acceleration = 0 
+            
+        # Calculate the new speed based on acceleration
         speed = speed + acceleration
+        # Dispaly the Speed of the player
         sSpeed(speed) 
+        # Draw the player on the screen
         dPlayer(300, 514) 
+        # Update the display and control the frame rate
         pygame.display.flip()
         clock.tick(30) 
               
