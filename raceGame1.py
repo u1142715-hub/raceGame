@@ -44,6 +44,22 @@ def sSpeed(speed):
     text_surface = font.render(f"{word}: {value}", True, (black)) 
     position = (500, 20) 
     screen.blit(text_surface, position)
+    
+def m_acceleration(acceleration, speed):
+    '''
+    @Summary: Gets the mouse input for acceleration and updates the acceleration variable
+    @Parameters: acceleration as integer, the current acceleration of the player
+                 speed as integer, the current speed of the player  
+    @Returns: Updated acceleration based on mouse input and speed limits
+    '''
+    mouse = pygame.mouse.get_pressed() 
+    if mouse[0] is True and speed > 0:     
+        acceleration = -1    
+    elif mouse[2] is True and speed < 500: 
+        acceleration = 1
+    else:
+        acceleration = 0 
+    return acceleration  
        
 def main(speed, acceleration):
     '''
@@ -59,14 +75,7 @@ def main(speed, acceleration):
                 pygame.quit(); sys.exit()
         
         # Get mouse input for acceleration
-        mouse = pygame.mouse.get_pressed() 
-        if mouse[0] is True and speed>.9:           
-            acceleration = -1    
-        elif mouse[2] is True: 
-            acceleration = 1
-        else:
-            acceleration = 0 
-            
+        acceleration = m_acceleration(acceleration, speed)
         # Calculate the new speed based on acceleration
         speed = speed + acceleration
         # Dispaly the Speed of the player
