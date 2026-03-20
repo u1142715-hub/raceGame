@@ -60,6 +60,14 @@ def m_acceleration(acceleration, speed):
     else:
         acceleration = 0 
     return acceleration  
+
+def dmap():
+    '''
+    @Summary: Draws the track on the screen (not implemented in this code snippet)
+    @Parameters: None
+    @Returns: None
+    '''
+    pass    
        
 def main(speed, acceleration):
     '''
@@ -74,12 +82,15 @@ def main(speed, acceleration):
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
         
+        # Draw the track (not implemented in this code snippet)
+        dmap()
         # Get mouse input for acceleration
         acceleration = m_acceleration(acceleration, speed)
         # Calculate the new speed based on acceleration
         speed = speed + acceleration
         # Dispaly the Speed of the player
         sSpeed(speed) 
+        # Update the position of the player based on the speed (not implemented in this code snippet)       
         # Draw the player on the screen
         dPlayer(300, 514) 
         # Update the display and control the frame rate
