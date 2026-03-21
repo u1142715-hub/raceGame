@@ -16,8 +16,14 @@ white=pygame.Color(255, 255, 255)
 black=pygame.Color(0, 0, 0)
 background = pygame.Color(white)
 acceleration = 0
-speed = 0
-mp = 450
+speed = 0 # Initial speed of the player
+mpx = 300 # x position of the start position of map1
+mpy = 450 # y position of the start position of map1
+checkpoints = [(3333,3333), (3333,5000),(1800,6000),(1000,7500),(2500,8500),(4000,8500)] # List of 19 checkpoints for the track for main map, not implemented in this code snippet
+mainmapx = 3333 # x position of the start/finish line of the main map
+mainmapy = 3333 # y position of the start/finish line of the main map
+
+
 
 # Functions
 def dPlayer(x,y):
@@ -62,27 +68,29 @@ def m_acceleration(acceleration, speed):
         acceleration = 0 
     return acceleration  
 
-def dmap(speed,mp):
+def dmap(speed,mpx,mpy): # Used to draw checkpoints and the track, not implemented in this code snippet
     '''
-    @Summary: Draws the track on the screen (not implemented in this code snippet)
-    @Parameters: None
-    @Returns: None
+    @Summary:    Draws the track on the screen based on the speed of the player
+    @Parameters: speed as integer, the speed of the player  
+                 mpx as integer, the current x position of the track     
+                 mpy as integer, the current y position of the track 
+    @Returns:    Updated y position of the track based on the speed of the player  
     '''
     # draw start finish line
-    mp = mp + (speed * 0.1)  # Adjust the multiplier as needed
-    print(speed, mp)
-    if mp > 600:
-        mp = mp - 600
-    return mp
+    mpy = mpy + (speed * 0.1)  # Adjust the multiplier as needed
+    # print(speed, mpx, mpy) # Used for debugging to see the speed and position of the track
+    if mpy > 600:
+        mpy = mpy - 600
+    return mpy
        
 def main(speed, acceleration):
     '''
-    @Summary: Main game loop, handles events, updates the game state, and renders the game
-    @Parameters: speed as integer, the speed of the player  
-                 acceleration as integer, the acceleration of the player
-    @Returns: None 
+    @Summary:    Main game loop that handles events, updates the game state, and renders the graphics
+    @Parameters: speed as integer, the initial speed of the player  
+                 acceleration as integer, the initial acceleration of the player
+    @Returns:    None, but continuously updates the game state and renders the graphics until the game is quit
     '''    
-    global mp
+    global mpy
     while True:
         screen.fill(background)
         for event in pygame.event.get():
@@ -97,12 +105,12 @@ def main(speed, acceleration):
         # Dispaly the Speed of the player
         sSpeed(speed) 
         # Draw the track (not implemented in this code snippet)
-        mp = dmap(speed, mp) 
+        mpy = dmap(speed, mpx, mpy) 
         # Update the position of the player based on the speed (not implemented in this code snippet)       
         # Draw the player on the screen
         dPlayer(300, 514) 
         # Update the display and control the frame rate
-        pygame.draw.line(screen, black, (250, mp), (350, mp), 3)
+        pygame.draw.line(screen, black, (mpx-50, mpy), (mpx+50, mpy), 3)
         pygame.draw.line(screen, black, (300, 0), (300, 600), 2) 
         pygame.display.flip()
         clock.tick(30) 
