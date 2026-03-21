@@ -14,10 +14,17 @@ pygame.display.set_caption("pygame-ce test")
 clock = pygame.time.Clock()
 white=pygame.Color(255, 255, 255)
 black=pygame.Color(0, 0, 0)
+red=pygame.Color(255, 0, 0)
 background = pygame.Color(white)
 acceleration = 0
-speed = 0
-mp = 450
+speed = 0 # Initial speed of the player
+mpx = 3333 # x position of the track, not implemented in this code snippet
+mpy = 3300 # y position of the track, not implemented in this code snippet
+checkpoints = [(3333,3333),(3333,5000),(1800,6000),(1000,7500),(2500,8500),(4000,8500),
+               (5000,5500),(7500,5000),(6666,6666),(6000,8500),(8000,8800),(8250,6000),
+               (7800,4000),(6000,3000),(7200,1800),(6666,900),(3333,700),(600,1500),(2700,2700)] # List of 19 checkpoints for the track for main map, not implemented in this code snippet
+mainmapx = checkpoints[0][0] # x position of the start/finish line of the main map
+mainmapy = checkpoints[0][1] # y position of the start/finish line of the main map
 
 # Functions
 def dPlayer(x,y):
@@ -29,9 +36,9 @@ def dPlayer(x,y):
                               .
                             .   .
     '''
-    screen.set_at((x, y-14), (black))  
-    screen.set_at((x-20, y+14), (black))  
-    screen.set_at((x+20, y+14), (black)) 
+    pygame.draw.circle(screen, red, (x,y-14), 5) # Draw the head of the player as a circle, not implemented in this code snippet
+    pygame.draw.circle(screen, red, (x-20,y+14), 5) # Draw the left wheel of the player as a circle, not implemented in this code snippet
+    pygame.draw.circle(screen, red, (x+20,y+14), 5) # Draw the right wheel of the player as a circle, not implemented in this code snippet
     
 def sSpeed(speed):    
     '''
@@ -62,48 +69,51 @@ def m_acceleration(acceleration, speed):
         acceleration = 0 
     return acceleration  
 
-def dmap(speed,mp):
+def dcheckpoint(mpx, mpy, checkpoints):
     '''
-    @Summary: Draws the track on the screen (not implemented in this code snippet)
-    @Parameters: None
-    @Returns: None
+    @Summary:    Draws a checkpoint on the screen
+    @Parameters: mpx as integer, the current x position of the track     
+                 mpy as integer, the current y position of the track 
+                 checkpoints as list of tuples, the x and y coordinates of the checkpoints to be drawn
+    @Returns:    None, but draws a checkpoint on the screen at the specified position
     '''
-    # draw start finish line
-    mp = mp + (speed * 0.1)  # Adjust the multiplier as needed
-    print(speed, mp)
-    if mp > 600:
-        mp = mp - 600
-    return mp
+    # This function is not implemented in the main game loop, but can be used to draw checkpoints
+    # on the track based on their position relative to the current position of the track
+    # Draw minimap of the track with checkpoints, not implemented in this code snippet
+    scale = 100 # Scale factor for the minimap, adjust as needed
+    fvar = 10000 # Variable to determine how many checkpoints to draw on the minimap, adjust as needed
+    for dcircle in checkpoints:
+        xcircle = int(dcircle[0]/scale) # Scale down the x coordinate of the checkpoint for the minimap
+        ycircle = int((fvar-dcircle[1])/scale) # Scale down the y coordinate of the checkpoint for the minimap
+        pygame.draw.circle(screen, black, (xcircle, ycircle), 2) # Draw the checkpoint on the minimap, not implemented in this code snippet
+    pygame.draw.circle(screen, red, (mpx/scale, (fvar-mpy)/scale), 2) # Draw the start/finish line on the minimap, not implemented in this code snippet
        
 def main(speed, acceleration):
     '''
-    @Summary: Main game loop, handles events, updates the game state, and renders the game
-    @Parameters: speed as integer, the speed of the player  
-                 acceleration as integer, the acceleration of the player
-    @Returns: None 
+    @Summary:    Main game loop that handles events, updates the game state, and renders the graphics
+    @Parameters: speed as integer, the initial speed of the player  
+                 acceleration as integer, the initial acceleration of the player
+    @Returns:    None, but continuously updates the game state and renders the graphics until the game is quit
     '''    
-    global mp
+    global mpx, mpy, checkpoints
     while True:
         screen.fill(background)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
-        
-         
+          
         # Get mouse input for acceleration
         acceleration = m_acceleration(acceleration, speed)
         # Calculate the new speed based on acceleration
         speed = speed + acceleration
         # Dispaly the Speed of the player
         sSpeed(speed) 
-        # Draw the track (not implemented in this code snippet)
-        mp = dmap(speed, mp) 
+        # Draw the minimap with checkpoints, not implemented in this code snippet
+        dcheckpoint(mpx, mpy, checkpoints)
         # Update the position of the player based on the speed (not implemented in this code snippet)       
         # Draw the player on the screen
         dPlayer(300, 514) 
         # Update the display and control the frame rate
-        pygame.draw.line(screen, black, (250, mp), (350, mp), 3)
-        pygame.draw.line(screen, black, (300, 0), (300, 600), 2) 
         pygame.display.flip()
         clock.tick(30) 
               
