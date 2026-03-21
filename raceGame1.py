@@ -1,7 +1,7 @@
 # Race verse self game, written by Sam Langhof Frederiksen, Started on 2024-06-17
-
-# Imports
-import pygame
+# run from command line with python raceGame1.py if using a virtual environment
+# Imports , best to create a virtual environment and install pygame in it to avoid compatibility issues with other projects, adjust as needed
+import pygame # Import the Pygame library for game development, I used pip install pygame-ce to install due to compatibility issues with the latest version of pygame, adjust as needed
 import sys
 import math
 
@@ -75,7 +75,7 @@ def m_acceleration(acceleration, speed):
     mouse = pygame.mouse.get_pressed() 
     if mouse[0] is True and speed > 0:     
         acceleration = -1    
-    elif mouse[2] is True and speed < 500: 
+    elif mouse[2] is True and speed < 1000: # Adjust the speed limit as needed
         acceleration = 1
     else:
         acceleration = 0 
