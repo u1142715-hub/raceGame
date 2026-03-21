@@ -80,12 +80,23 @@ def dcheckpoint(mpx, mpy, checkpoints):
     # This function is not implemented in the main game loop, but can be used to draw checkpoints
     # on the track based on their position relative to the current position of the track
     # Draw minimap of the track with checkpoints, not implemented in this code snippet
+    # function variable to determine how many checkpoints to draw on the minimap, adjust as needed
     scale = 100 # Scale factor for the minimap, adjust as needed
     fvar = 10000 # Variable to determine how many checkpoints to draw on the minimap, adjust as needed
+    sflinex = (checkpoints[0][0]/scale) # x coordinate of the start/finish line of the track, not implemented in this code snippet
+    sfliney = ((fvar-checkpoints[0][1])/scale) # y coordinate of the start/finish line of the track, not implemented in this code snippet
+    lastx = sflinex # x coordinate of the last checkpoint drawn on the minimap, not implemented in this code snippet
+    lasty = sfliney # y coordinate of the last checkpoint drawn on the minimap, not implemented in this code snippet
     for dcircle in checkpoints:
+        # Pause the program to allow for step-by-step drawing of checkpoints on the minimap, not implemented in this code snippet
         xcircle = int(dcircle[0]/scale) # Scale down the x coordinate of the checkpoint for the minimap
         ycircle = int((fvar-dcircle[1])/scale) # Scale down the y coordinate of the checkpoint for the minimap
         pygame.draw.circle(screen, black, (xcircle, ycircle), 2) # Draw the checkpoint on the minimap, not implemented in this code snippet
+        pygame.draw.line(screen, black, (lastx, lasty), (xcircle, ycircle), 1) # Draw a line from the current position of the track to the checkpoint on the minimap, not implemented in this code snippet
+        lastx = xcircle # Update the last x coordinate for the next checkpoint, not implemented in this code snippet
+        lasty = ycircle # Update the last y coordinate for the next checkpoint, not implemented in this code snippet
+               
+    pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 1)
     pygame.draw.circle(screen, red, (mpx/scale, (fvar-mpy)/scale), 2) # Draw the start/finish line on the minimap, not implemented in this code snippet
        
 def main(speed, acceleration):
@@ -108,7 +119,7 @@ def main(speed, acceleration):
         speed = speed + acceleration
         # Dispaly the Speed of the player
         sSpeed(speed) 
-        # Draw the minimap with checkpoints, not implemented in this code snippet
+        # Draw the minimap with checkpoints
         dcheckpoint(mpx, mpy, checkpoints)
         # Update the position of the player based on the speed (not implemented in this code snippet)       
         # Draw the player on the screen
