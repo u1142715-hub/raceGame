@@ -139,6 +139,36 @@ def movePlayer(speed, playerRotation, mpx, mpy):
     mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 # Update the y coordinate of the player, remember y inverted for easier math with the track coordinates, adjust as needed, not implemented in this code snippet
     return mpx, mpy
     
+def showtrackvsplayer(mpx, mpy, checkpoints):
+    '''
+    @Summary:    Shows the track and player on the screen, not implemented in this code snippet
+    @Parameters: mpx as integer, the current x coordinate of the player  
+                 mpy as integer, the current y coordinate of the player 
+                 checkpoints as list of tuples, the x and y coordinates of the checkpoints to be drawn
+    @Returns:    None, but shows the track and player on the screen, not implemented in this code snippet
+    '''
+    # player position on main map does not change, screen size is 600 x 600only the track and checkpoints move based on the player's position
+    x = 300 # x coordinate of the player on the screen, not implemented in this code snippet
+    y = 550 # y coordinate of the player on the screen, not implemented in this code snippet, y in realitiy is 600-50 for easier math with the track coordinates, adjust as needed
+    lastx = (checkpoints[18][0])
+    lasty = (10000-checkpoints[18][1]) - (10000-mpy) + y # Calculate the y coordinate of the last checkpoint drawn on the screen based on the player's position, not implemented in this code snippet
+    for checkpoint in checkpoints:
+        # check if track or checkpoint is within the screen bounds before drawing
+        xcheck = checkpoint[0] - mpx + x # Calculate the x coordinate of the checkpoint on the screen based on the player's position, not implemented in this code snippet
+        ycheck = (10000-checkpoint[1]) - (10000-mpy) + y # Calculate the y coordinate of the checkpoint on the screen based on the player's position, not implemented in this code snippet
+        if 0 <= xcheck <= 600 and 0 <= ycheck <= 600: # Check if the checkpoint is within the screen bounds, not implemented in this code snippet
+            pygame.draw.circle(screen, black, (xcheck, ycheck), 75) # Draw the checkpoint on the screen, not implemented in this code snippet
+        
+        # don't draw a line from the last checkpoint to the first checkpoint, as it will be drawn at the end of the loop, but still draw line to first checkpoint
+        if checkpoint != checkpoints[0]: # Check if the checkpoint is not the first checkpoint, not implemented in this code snippet    
+            pygame.draw.line(screen, black, (lastx, lasty), (xcheck, ycheck), 5) # Draw a line from the current position of the track to the checkpoint on the screen, not implemented in this code snippet
+        lastx = xcheck # Update the last x coordinate for the next checkpoint, not implemented in this code snippet
+        lasty = ycheck # Update the last y coordinate for the next checkpoint, not implemented in this code snippet
+    # Draw a line from the last checkpoint to the start/finish line on the screen, not implemented in this code snippet
+    sflinex = (checkpoints[0][0]) - mpx + x # Calculate the x coordinate of the start/finish line on the screen based on the player's position, not implemented in this code snippet
+    sfliney = ((10000-checkpoints[0][1]) - (10000-mpy) + y) # Calculate the y coordinate of the start/finish line on the screen based on the player's position, not implemented in this code snippet
+    pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5) # Draw a line from the last checkpoint to the start/finish line on the screen, not implemented in this code snippet
+                                                 
 def main(speed, acceleration):
     '''
     @Summary:    Main game loop that handles events, updates the game state, and renders the graphics
@@ -163,7 +193,8 @@ def main(speed, acceleration):
         playerRotation = dcheckturn(playerRotation) 
         mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy) # Update the player's position based on speed and rotation, not implemented in this code snippet
         # Draw the minimap with checkpoints
-        dcheckpoint(mpx, mpy, checkpoints)    
+        dcheckpoint(mpx, mpy, checkpoints)   
+        showtrackvsplayer(mpx, mpy, checkpoints) # Show the track and player on the screen, not implemented in this code snippet 
         # Draw the player on the screen in dafault rotation
         dPlayer(300, 514,playerRotation) # Draw the player on the screen at the specified position and rotation, not implemented in this code snippet
         # Update the display and control the frame rate
