@@ -1,4 +1,4 @@
-# Race verse self game, written by Sam Langhof Frederiksen, 2024-06-17
+# Race verse self game, written by Sam Langhof Frederiksen, Started on 2024-06-17
 
 # Imports
 import pygame
@@ -32,21 +32,22 @@ mainmapy = checkpoints[0][1] # y position of the start/finish line of the main m
 # Functions
 def dPlayer(x,y,playerRotation):
     '''
-    @Summary:   Draws the player on the screen at the specified x and y coordinates 
+    @Summary:   Draws the player on the screen at the specified position and rotation
     @Parameters: x as integer, the x coordinate of the player on the screen
                     y as integer, the y coordinate of the player on the screen
-                    playerRotation as integer, the rotation of the player based on the direction of movement, not implemented in this code snippet
-    @Returns:   None, but draws the player on the screen at the specified position  
+                    playerRotation as integer, the rotation of the player in degrees
+    @Returns:   None, but draws the player on the screen at the specified position and rotation 
                               .
                             .   .
     '''
-    # draw the default player
-    tpx=math.cos(math.radians(playerRotation)) * 20 + x # Calculate the x coordinate of the front of the player based on the player rotation, not implemented in this code snippet
-    tpy=math.sin(math.radians(playerRotation)) * 20 + y # Calculate the y coordinate of the front of the player based on the player rotation, not implemented in this code snippet
-    lpx=math.cos(math.radians(playerRotation - 90)) * 20 + x # Calculate the x coordinate of the left side of the player based on the player rotation, not implemented in this code snippet
-    lpy=math.sin(math.radians(playerRotation - 90)) * 20 + y # Calculate the y coordinate of the left side of the player based on the player rotation, not implemented in this code snippet
-    rpx=math.cos(math.radians(playerRotation + 90)) * 20 + x # Calculate the x coordinate of the right side of the player based on the player rotation, not implemented in this code snippet
-    rpy=math.sin(math.radians(playerRotation + 90)) * 20 + y # Calculate the y coordinate of the right side of the player based on the player rotation, not implemented in this code snippet    
+    # draw the default player as equalateral triangle with the front of the player in green and the left and right sides in red, not implemented in this code snippet       
+    psize = 15 # Size of the player, adjust as needed   
+    tpx=math.cos(math.radians(playerRotation)) * psize + x # Calculate the x coordinate of the front of the player based on the player rotation, not implemented in this code snippet
+    tpy=math.sin(math.radians(playerRotation)) * psize + y # Calculate the y coordinate of the front of the player based on the player rotation, not implemented in this code snippet
+    lpx=math.cos(math.radians(playerRotation - 90)) * psize + x # Calculate the x coordinate of the left side of the player based on the player rotation, not implemented in this code snippet
+    lpy=math.sin(math.radians(playerRotation - 90)) * psize + y # Calculate the y coordinate of the left side of the player based on the player rotation, not implemented in this code snippet
+    rpx=math.cos(math.radians(playerRotation + 90)) * psize + x # Calculate the x coordinate of the right side of the player based on the player rotation, not implemented in this code snippet
+    rpy=math.sin(math.radians(playerRotation + 90)) * psize + y # Calculate the y coordinate of the right side of the player based on the player rotation, not implemented in this code snippet    
     pygame.draw.circle(screen, green, (tpx,tpy), 5) # Draw the front of the player
     pygame.draw.circle(screen, red, (lpx,lpy), 5) # Draw the left side of the player
     pygame.draw.circle(screen, red, (rpx,rpy), 5) # Draw the right side of the player
@@ -125,6 +126,19 @@ def dcheckturn(playerRotation):
     playerRotation=playerRotation % 360 # Ensure the player rotation stays within 0-359 degrees, not implemented in this code snippet
     return playerRotation
 
+def movePlayer(speed, playerRotation, mpx, mpy):
+    '''
+    @Summary:    Updates the player's position based on speed and rotation
+    @Parameters: speed as integer, the current speed of the player  
+                 playerRotation as integer, the current rotation of the player in degrees
+                 mpx as integer, the current x coordinate of the player
+                 mpy as integer, the current y coordinate of the player, not implemented in this code snippet
+    @Returns:    Updated player position based on speed and rotation, not implemented in this code snippet
+    '''
+    mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 # Update the x coordinate of the player based on speed and rotation, not implemented in this code snippet
+    mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 # Update the y coordinate of the player, remember y inverted for easier math with the track coordinates, adjust as needed, not implemented in this code snippet
+    return mpx, mpy
+    
 def main(speed, acceleration):
     '''
     @Summary:    Main game loop that handles events, updates the game state, and renders the graphics
@@ -145,11 +159,12 @@ def main(speed, acceleration):
         speed = speed + acceleration
         # Dispaly the Speed of the player
         sSpeed(speed) 
+        # Update the player rotation based on keyboard input
+        playerRotation = dcheckturn(playerRotation) 
+        mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy) # Update the player's position based on speed and rotation, not implemented in this code snippet
         # Draw the minimap with checkpoints
-        dcheckpoint(mpx, mpy, checkpoints)
-        # Update the position of the player based on the speed (not implemented in this code snippet)       
+        dcheckpoint(mpx, mpy, checkpoints)    
         # Draw the player on the screen in dafault rotation
-        playerRotation = dcheckturn(playerRotation) # Check for mouse movement to determine if the player is turning and update the player rotation variable accordingly, not implemented in this code snippet
         dPlayer(300, 514,playerRotation) # Draw the player on the screen at the specified position and rotation, not implemented in this code snippet
         # Update the display and control the frame rate
         pygame.display.flip()
