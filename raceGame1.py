@@ -53,6 +53,33 @@ background = pygame.Color(white)
 # Input Functions
 
 # Calculation Functions
+# Pre_Game Calculations for speed optimisation during play
+def precalculations(psize):
+    '''
+    
+    '''
+    x=300
+    y=550
+    #Loop
+    for deg in range(0,360,5):
+        tpx=math.cos(math.radians(deg)) * psize + x 
+        tpy=math.sin(math.radians(deg)) * psize + y 
+        lpx=math.cos(math.radians(deg - 90)) * psize + x 
+        lpy=math.sin(math.radians(deg - 90)) * psize + y 
+        rpx=math.cos(math.radians(deg + 90)) * psize + x 
+        rpy=math.sin(math.radians(deg + 90)) * psize + y 
+        #print(tpx,tpy,lpx,lpy,rpx,rpy)
+        #print(deg)
+        #print()
+        # create a new tuple to hold this information, then replace other function with tuple call instead of recalculating
+    #pygame.quit(); sys.exit()
+    #return tpx,tpy,lpx,lpy,rpx,rpy 
+
+precalculations(psize)
+
+            
+    
+
 
 # Display Functions
 # Draw Player
@@ -70,6 +97,13 @@ def showText(Value,x,y):
     
 # Draw Minimap
 def dcheckpoint(mpx, mpy, checkpoints):
+    '''
+    @Summary:       Draws a minimap for player to easily see where they are in relation to track
+    @Parameters:    mpx as integer
+                    mpy as integer
+                    checkpoints as tuple
+    @Returns:       minimap top left of screen of track and player position
+    '''
     scale = 100 
     fvar = 10000 
     sflinex = (checkpoints[0][0]/scale) 
