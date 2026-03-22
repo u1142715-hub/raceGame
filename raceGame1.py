@@ -78,8 +78,14 @@ def dcheckpoint(mpx, mpy, checkpoints):
     lasty = sfliney 
     for dcircle in checkpoints:
         xcircle = int(dcircle[0]/scale) 
-        ycircle = int((fvar-dcircle[1])/scale) 
-        pygame.draw.circle(screen, black, (xcircle, ycircle), 2) 
+        ycircle = int((fvar-dcircle[1])/scale)
+        gcircle = int(dcircle[2])
+        if gcircle == 0:
+            color=black
+        else:
+            color=green
+        
+        pygame.draw.circle(screen, color, (xcircle, ycircle), 2) 
         pygame.draw.line(screen, black, (lastx, lasty), (xcircle, ycircle), 1) 
         lastx = xcircle 
         lasty = ycircle
@@ -89,6 +95,15 @@ def dcheckpoint(mpx, mpy, checkpoints):
 
 # Draw Track   
 def showtrackvsplayer(mpx, mpy, checkpoints):
+    '''
+    @Summary:       Draws track on screen, based on player center point x,y (player only rotates does not move, track moves instead)
+    @Parameters:    mpx as integer, first value, players x coordinate on main scale
+                    mpy as integer, 2nd value, players y coordinate on main scale
+                    checkpoints as tuple, holds x,y position for checkpoints, and third value is to check if player passed through correctly
+    @Returns:       None, however draws 75px diameter circles, color based on test, and only if close enough to player, 
+                    draws line between checkpoints, only if in range of player.
+    '''
+    
     x = 300 
     y = 550 
     lastx = (checkpoints[18][0])
@@ -97,7 +112,12 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
         xcheck = checkpoint[0] - mpx + x 
         ycheck = (10000-checkpoint[1]) - (10000-mpy) + y
         if 0 <= xcheck <= 600 and 0 <= ycheck <= 600: 
-            pygame.draw.circle(screen, black, (xcheck, ycheck), 75) 
+            if checkpoint[2]==0:
+                color = black
+            else:
+                color = green
+            
+            pygame.draw.circle(screen, color, (xcheck, ycheck), 75) 
         
         if checkpoint != checkpoints[0]: 
             pygame.draw.line(screen, black, (lastx, lasty), (xcheck, ycheck), 5) 
