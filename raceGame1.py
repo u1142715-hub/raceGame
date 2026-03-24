@@ -87,9 +87,9 @@ def drawPlayer(rotationArray,playerRotation):
     pygame.draw.circle(screen, red, (rpx,rpy), 5) 
 
 # Draw On Screen Display      
-def showText(Value,x,y):
+def showText(name,Value,x,y):
     font = pygame.font.SysFont(None, 20) 
-    text_surface = font.render(f"Local Time: {Value}", True, (black))
+    text_surface = font.render(f"{name}{Value}", True, (black))
     position = (x, y)
     screen.blit(text_surface, position)
     
@@ -160,8 +160,11 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
                     
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
+    cx = checkpoints[0][0]
+    cy = checkpoints[0][1]
+    markercounter = 0
+    elapsed = 0
     # Main Loop
-    
     while True:
         screen.fill(background)
         # Escape Loop if window closed
@@ -194,11 +197,37 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
                     
-        # lapTime = sTime(lapTime)
+        # Check to see if first marker has been passed 
         if checkpoints[0][2] == 0 and (mpx - checkpoints[0][0])**2 + (mpy - checkpoints[0][1])**2 < 75**2:         
             checkpoints[0] = (checkpoints[0][0], checkpoints[0][1], 1) 
             lapTime = float(0.0) 
-            lcheck ="Lap started"
+            lcheck = 1
+            lap_start = time.time()
+            markercounter = markercounter + 1
+            
+        # if laptime started update laptime
+        if lcheck ==1:
+            # Laptime Active
+            elapsed = time.time() - lap_start
+            hrs = int(elapsed // 3600)
+            mins = int((elapsed % 3600) // 60)
+            secs = int(elapsed % 60)
+            lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
+
+        # if laptime active, alter state of each marker if they passed in correct order
+        # if all markers passed reset laptime when start finish marker passed again
+        # store lap time in a variable, compare with best lap, if better replace best lap with new time
+        if elapsed>1:
+            if (checkpoints[markercounter][2]) == 0:
+                #check to see if player is on marker now
+                cx = checkpoints[markercounter][0]
+                cy = checkpoints[markercounter][1]
+                if abs(cx-mpx) and abs((cy)-(mpy))<75:
+                    #checkpoints[markercounter][2] = 1
+                    markercounter += 1
+        print(cx,mpx,cy,mpy)    
+            
+            
         
         # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
         dcheckpoint(mpx, mpy, checkpoints)   
@@ -206,9 +235,10 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                 
         # Draw Screen
         drawPlayer(rotationArray, playerRotation)
-        showText(speed,450,20)
-        showText((time.strftime("%H:%M:%S", time.localtime())),450,40)
-        showText(lapTime,450,60)
+        showText("Speed ",speed,450,20)
+        showText("Local Time ",(time.strftime("%H:%M:%S", time.localtime())),450,40)
+        showText("Lap Time ",lapTime,450,60)
+        showText("Current Marker",lcheck,450,80)
         pygame.display.flip()
         clock.tick(30) 
               
