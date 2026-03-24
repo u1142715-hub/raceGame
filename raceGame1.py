@@ -38,7 +38,7 @@ psize = 15
 mpx = 3135
 mpy = 3100
 playerRotation = 360-45 
-
+rotationArray = {}
 # Time Variables
 clock = pygame.time.Clock()
 lapTime = 0.0 
@@ -54,36 +54,34 @@ background = pygame.Color(white)
 
 # Calculation Functions
 # Pre_Game Calculations for speed optimisation during play
-def precalculations(psize):
+def precalculations(rotationArray, psize):
     '''
-    
+    @Summary:       Precalculate maths operations before game starts and place them in an array
+    @Parameters:    psize as integer, is used to scale the distance between circles
+    @Returns:       rotationArray as a dictionary, contains rotation angle, calculated x,y positions for all 3 circles based on angle
     '''
-    x=300
-    y=550
-    #Loop
-    for deg in range(0,360,5):
-        tpx=math.cos(math.radians(deg)) * psize + x 
-        tpy=math.sin(math.radians(deg)) * psize + y 
-        lpx=math.cos(math.radians(deg - 90)) * psize + x 
-        lpy=math.sin(math.radians(deg - 90)) * psize + y 
-        rpx=math.cos(math.radians(deg + 90)) * psize + x 
-        rpy=math.sin(math.radians(deg + 90)) * psize + y 
-        #print(tpx,tpy,lpx,lpy,rpx,rpy)
-        #print(deg)
-        #print()
-        # create a new tuple to hold this information, then replace other function with tuple call instead of recalculating
-    #pygame.quit(); sys.exit()
-    #return tpx,tpy,lpx,lpy,rpx,rpy 
-
-precalculations(psize)
-
-            
-    
-
-
+    x = 300
+    y = 550
+    for angle in range(0, 365, 5):
+        tpx = math.cos(math.radians(angle)) * psize + x
+        tpy = math.sin(math.radians(angle)) * psize + y
+        lpx = math.cos(math.radians(angle - 90)) * psize + x
+        lpy = math.sin(math.radians(angle - 90)) * psize + y
+        rpx = math.cos(math.radians(angle + 90)) * psize + x
+        rpy = math.sin(math.radians(angle + 90)) * psize + y
+        rotationArray[angle] = {
+            "top":   (tpx, tpy),
+            "left":  (lpx, lpy),
+            "right": (rpx, rpy)
+        }
+    return rotationArray
+       
 # Display Functions
 # Draw Player
-def drawPlayer(tpx,tpy,lpx,lpy,rpx,rpy):
+def drawPlayer(rotationArray,playerRotation):
+    tpx, tpy = rotationArray[playerRotation]["top"]
+    lpx, lpy = rotationArray[playerRotation]["left"]
+    rpx, rpy = rotationArray[playerRotation]["right"]
     pygame.draw.circle(screen, green, (tpx,tpy), 5) 
     pygame.draw.circle(screen, red, (lpx,lpy), 5) 
     pygame.draw.circle(screen, red, (rpx,rpy), 5) 
@@ -160,18 +158,7 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     sflinex = (checkpoints[0][0]) - mpx + x 
     sfliney = ((10000-checkpoints[0][1]) - (10000-mpy) + y) 
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
-    
-# Race Functions
-def dPlayer(x,y,playerRotation,psize):
-    # PreCalculate this throw all answers in array to speed game up - Optimisation 1        
-    tpx=math.cos(math.radians(playerRotation)) * psize + x 
-    tpy=math.sin(math.radians(playerRotation)) * psize + y 
-    lpx=math.cos(math.radians(playerRotation - 90)) * psize + x 
-    lpy=math.sin(math.radians(playerRotation - 90)) * psize + y 
-    rpx=math.cos(math.radians(playerRotation + 90)) * psize + x 
-    rpy=math.sin(math.radians(playerRotation + 90)) * psize + y 
-    return tpx,tpy,lpx,lpy,rpx,rpy 
-                
+                    
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
     # Main Loop
     
@@ -206,8 +193,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         # Move Player
         mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
-        tpx,tpy,lpx,lpy,rpx,rpy = dPlayer(300, 514,playerRotation,psize)
-            
+                    
         # lapTime = sTime(lapTime)
         if checkpoints[0][2] == 0 and (mpx - checkpoints[0][0])**2 + (mpy - checkpoints[0][1])**2 < 75**2:         
             checkpoints[0] = (checkpoints[0][0], checkpoints[0][1], 1) 
@@ -219,7 +205,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         showtrackvsplayer(mpx, mpy, checkpoints)  
                 
         # Draw Screen
-        drawPlayer(tpx,tpy,lpx,lpy,rpx,rpy)
+        drawPlayer(rotationArray, playerRotation)
         showText(speed,450,20)
         showText((time.strftime("%H:%M:%S", time.localtime())),450,40)
         showText(lapTime,450,60)
@@ -229,4 +215,6 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
 # Run the game
 # precalculations() #This function will loop 0 to 360, step 5, calculate maths values * psize(player size) 
 # and put in an array. optimise for speed, so calculations only done once
+rotationArray = precalculations(rotationArray, psize)
+# Start Game
 main(speed, acceleration, mpx, mpy, playerRotation, checkpoints, lapTime, lcheck)
