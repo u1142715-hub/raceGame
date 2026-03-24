@@ -87,9 +87,9 @@ def drawPlayer(rotationArray,playerRotation):
     pygame.draw.circle(screen, red, (rpx,rpy), 5) 
 
 # Draw On Screen Display      
-def showText(Value,x,y):
+def showText(name,Value,x,y):
     font = pygame.font.SysFont(None, 20) 
-    text_surface = font.render(f"Local Time: {Value}", True, (black))
+    text_surface = font.render(f"{name}{Value}", True, (black))
     position = (x, y)
     screen.blit(text_surface, position)
     
@@ -161,7 +161,6 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
                     
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
     # Main Loop
-    
     while True:
         screen.fill(background)
         # Escape Loop if window closed
@@ -194,11 +193,24 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
                     
-        # lapTime = sTime(lapTime)
+        # Check to see if first marker has been passed 
         if checkpoints[0][2] == 0 and (mpx - checkpoints[0][0])**2 + (mpy - checkpoints[0][1])**2 < 75**2:         
             checkpoints[0] = (checkpoints[0][0], checkpoints[0][1], 1) 
             lapTime = float(0.0) 
-            lcheck ="Lap started"
+            lcheck = 1
+            lap_start = time.time()
+            
+        # if laptime started update laptime
+        if lcheck ==1:
+            # Laptime Active
+            elapsed = time.time() - lap_start
+            hrs = int(elapsed // 3600)
+            mins = int((elapsed % 3600) // 60)
+            secs = int(elapsed % 60)
+            lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
+
+            
+            
         
         # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
         dcheckpoint(mpx, mpy, checkpoints)   
@@ -206,9 +218,10 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                 
         # Draw Screen
         drawPlayer(rotationArray, playerRotation)
-        showText(speed,450,20)
-        showText((time.strftime("%H:%M:%S", time.localtime())),450,40)
-        showText(lapTime,450,60)
+        showText("Speed ",speed,450,20)
+        showText("Local Time ",(time.strftime("%H:%M:%S", time.localtime())),450,40)
+        showText("Lap Time ",lapTime,450,60)
+        showText("Current Marker",lcheck,450,80)
         pygame.display.flip()
         clock.tick(30) 
               
