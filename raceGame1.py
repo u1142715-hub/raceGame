@@ -160,6 +160,10 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
                     
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
+    cx = checkpoints[0][0]
+    cy = checkpoints[0][1]
+    markercounter = 0
+    elapsed = 0
     # Main Loop
     while True:
         screen.fill(background)
@@ -199,6 +203,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
             lapTime = float(0.0) 
             lcheck = 1
             lap_start = time.time()
+            markercounter = markercounter + 1
             
         # if laptime started update laptime
         if lcheck ==1:
@@ -209,6 +214,18 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
             secs = int(elapsed % 60)
             lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
 
+        # if laptime active, alter state of each marker if they passed in correct order
+        # if all markers passed reset laptime when start finish marker passed again
+        # store lap time in a variable, compare with best lap, if better replace best lap with new time
+        if elapsed>1:
+            if (checkpoints[markercounter][2]) == 0:
+                #check to see if player is on marker now
+                cx = checkpoints[markercounter][0]
+                cy = checkpoints[markercounter][1]
+                if abs(cx-mpx) and abs((cy)-(mpy))<75:
+                    #checkpoints[markercounter][2] = 1
+                    markercounter += 1
+        print(cx,mpx,cy,mpy)    
             
             
         
