@@ -11,7 +11,7 @@
 # Date Started: 14/03/2026
 
 # Import necessary libraries
-import pygame 
+import pygame
 import sys
 import math
 import time
@@ -24,12 +24,30 @@ red=pygame.Color(255, 0, 0)
 green=pygame.Color(0, 255, 0)
 
 # Checkpoints
-checkpoints = [(3333,3333,0),(3333,5000,0),(1800,6000,0),(1000,7500,0),(2500,8500,0),(4000,8500,0),
-               (5000,5500,0),(7500,5000,0),(6666,6666,0),(6000,8500,0),(8000,8800,0),(8250,6000,0),
-               (7800,4000,0),(6000,3000,0),(7200,1800,0),(6666,900,0),(3333,700,0),(600,1500,0),(2700,2700,0)]
+checkpoints = (
+{"x":(3333),"y":(3333),"active":(0)}, # start finish marker 0
+{"x":(3333),"y":(5000),"active":(0)}, # marker 1
+{"x":(1800),"y":(6000),"active":(0)}, # marker 2
+{"x":(1000),"y":(7500),"active":(0)}, # marker 3
+{"x":(2500),"y":(8500),"active":(0)}, # marker 4
+{"x":(4000),"y":(8500),"active":(0)}, # marker 5
+{"x":(5000),"y":(5500),"active":(0)}, # marker 6
+{"x":(7500),"y":(5000),"active":(0)}, # marker 7
+{"x":(6666),"y":(6666),"active":(0)}, # marker 8
+{"x":(6000),"y":(8500),"active":(0)}, # marker 9
+{"x":(8000),"y":(8000),"active":(0)}, # marker 10
+{"x":(8250),"y":(6000),"active":(0)}, # marker 11
+{"x":(7800),"y":(4000),"active":(0)}, # marker 12
+{"x":(6000),"y":(3000),"active":(0)}, # marker 13
+{"x":(7200),"y":(1800),"active":(0)}, # marker 14
+{"x":(6666),"y":(900),"active":(0)}, # marker 15
+{"x":(3333),"y":(700),"active":(0)}, # marker 16
+{"x":(600),"y":(1500),"active":(0)}, # marker 17
+{"x":(2700),"y":(2700),"active":(0)}, # marker 18
+)
 lcheck = 0 
-mainmapx = checkpoints[0][0]
-mainmapy = checkpoints[0][1]
+mainmapx = checkpoints[0]["x"]
+mainmapy = checkpoints[0]["y"]
 
 # Player Variables
 acceleration = 0
@@ -75,7 +93,7 @@ def precalculations(rotationArray, psize):
             "right": (rpx, rpy)
         }
     return rotationArray
-       
+ 
 # Display Functions
 # Draw Player
 def drawPlayer(rotationArray,playerRotation):
@@ -104,14 +122,14 @@ def dcheckpoint(mpx, mpy, checkpoints):
     '''
     scale = 100 
     fvar = 10000 
-    sflinex = (checkpoints[0][0]/scale) 
-    sfliney = ((fvar-checkpoints[0][1])/scale) 
+    sflinex = ((checkpoints[0]["x"])/scale) 
+    sfliney = ((fvar-checkpoints[0]["y"])/scale) 
     lastx = sflinex 
     lasty = sfliney 
     for dcircle in checkpoints:
-        xcircle = int(dcircle[0]/scale) 
-        ycircle = int((fvar-dcircle[1])/scale)
-        gcircle = int(dcircle[2])
+        xcircle = int((dcircle["x"])/scale) 
+        ycircle = int((fvar-dcircle["y"])/scale)
+        gcircle = int(dcircle["active"])
         if gcircle == 0:
             color=black
         else:
@@ -138,13 +156,13 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     
     x = 300 
     y = 550 
-    lastx = (checkpoints[18][0])
-    lasty = (10000-checkpoints[18][1]) - (10000-mpy) + y 
+    lastx = (checkpoints[18]["x"])
+    lasty = (10000-checkpoints[18]["y"]) - (10000-mpy) + y 
     for checkpoint in checkpoints:
-        xcheck = checkpoint[0] - mpx + x 
-        ycheck = (10000-checkpoint[1]) - (10000-mpy) + y
+        xcheck = checkpoint["x"] - mpx + x 
+        ycheck = (10000-checkpoint["y"]) - (10000-mpy) + y
         if 0 <= xcheck <= 600 and 0 <= ycheck <= 600: 
-            if checkpoint[2]==0:
+            if checkpoint["active"]==0:
                 color = black
             else:
                 color = green
@@ -155,13 +173,13 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
             pygame.draw.line(screen, black, (lastx, lasty), (xcheck, ycheck), 5) 
         lastx = xcheck 
         lasty = ycheck 
-    sflinex = (checkpoints[0][0]) - mpx + x 
-    sfliney = ((10000-checkpoints[0][1]) - (10000-mpy) + y) 
+    sflinex = (checkpoints[0]["x"]) - mpx + x 
+    sfliney = ((10000-checkpoints[0]["y"]) - (10000-mpy) + y) 
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
                     
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
-    cx = checkpoints[0][0]
-    cy = checkpoints[0][1]
+    cx = checkpoints[0]["x"]
+    cy = checkpoints[0]["y"]
     markercounter = 0
     elapsed = 0
     # Main Loop
@@ -198,8 +216,8 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
                     
         # Check to see if first marker has been passed 
-        if checkpoints[0][2] == 0 and (mpx - checkpoints[0][0])**2 + (mpy - checkpoints[0][1])**2 < 75**2:         
-            checkpoints[0] = (checkpoints[0][0], checkpoints[0][1], 1) 
+        if checkpoints[0]["active"] == 0 and (mpx - checkpoints[0]["x"])**2 + (mpy - checkpoints[0]["y"])**2 < 75**2:         
+            checkpoints[0]["active"] = 1
             lapTime = float(0.0) 
             lcheck = 1
             lap_start = time.time()
@@ -218,10 +236,10 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         # if all markers passed reset laptime when start finish marker passed again
         # store lap time in a variable, compare with best lap, if better replace best lap with new time
         if elapsed>1:
-            if (checkpoints[markercounter][2]) == 0:
+            if (checkpoints[markercounter]["active"]) == 0:
                 #check to see if player is on marker now
-                cx = checkpoints[markercounter][0]
-                cy = checkpoints[markercounter][1]
+                cx = checkpoints[markercounter]["x"]
+                cy = checkpoints[markercounter]["y"]
                 if abs(cx-mpx) and abs((cy)-(mpy))<75:
                     #checkpoints[markercounter][2] = 1
                     markercounter += 1
