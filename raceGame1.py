@@ -68,8 +68,6 @@ pygame.display.set_caption("raceGame1")
 background = pygame.Color(white)
 
 # Functions
-# Input Functions
-
 # Calculation Functions
 # Pre_Game Calculations for speed optimisation during play
 def precalculations(rotationArray, psize):
@@ -79,7 +77,7 @@ def precalculations(rotationArray, psize):
     @Returns:       rotationArray as a dictionary, contains rotation angle, calculated x,y positions for all 3 circles based on angle
     '''
     x = 300
-    y = 550
+    y = 300
     for angle in range(0, 365, 5):
         tpx = math.cos(math.radians(angle)) * psize + x
         tpy = math.sin(math.radians(angle)) * psize + y
@@ -155,7 +153,7 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     '''
     
     x = 300 
-    y = 550 
+    y = 300 
     lastx = (checkpoints[18]["x"])
     lasty = (10000-checkpoints[18]["y"]) - (10000-mpy) + y 
     for checkpoint in checkpoints:
@@ -176,12 +174,19 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     sflinex = (checkpoints[0]["x"]) - mpx + x 
     sfliney = ((10000-checkpoints[0]["y"]) - (10000-mpy) + y) 
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
-                    
+ 
+# Main game engine function                   
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
     cx = checkpoints[0]["x"]
     cy = checkpoints[0]["y"]
     markercounter = 0
+    bestLap = 600
+    hrs = int(bestLap // 3600)
+    mins = int((bestLap % 3600) // 60)
+    secs = int(bestLap % 60)
+    bestLap =f"{hrs:02}:{mins:02}:{secs:02}"
     elapsed = 0
+    
     # Main Loop
     while True:
         screen.fill(background)
@@ -216,6 +221,14 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
                     
         # Check to see if first marker has been passed 
+        if markercounter >18:
+                markercounter = 0
+                for init in checkpoints:
+                    init["active"]=0
+                lcheck =0
+                if lapTime < bestLap:
+                    bestLap = lapTime
+                
         if checkpoints[0]["active"] == 0 and (mpx - checkpoints[0]["x"])**2 + (mpy - checkpoints[0]["y"])**2 < 75**2:         
             checkpoints[0]["active"] = 1
             lapTime = float(0.0) 
@@ -231,6 +244,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
             mins = int((elapsed % 3600) // 60)
             secs = int(elapsed % 60)
             lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
+            
 
         # if laptime active, alter state of each marker if they passed in correct order
         # if all markers passed reset laptime when start finish marker passed again
@@ -240,13 +254,10 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                 #check to see if player is on marker now
                 cx = checkpoints[markercounter]["x"]
                 cy = checkpoints[markercounter]["y"]
-                if abs(cx-mpx) and abs((cy)-(mpy))<75:
-                    #checkpoints[markercounter][2] = 1
+                if abs(cx-mpx) <75 and abs((cy)-(mpy))<75:
+                    checkpoints[markercounter]["active"] = 1
                     markercounter += 1
-        print(cx,mpx,cy,mpy)    
-            
-            
-        
+
         # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
         dcheckpoint(mpx, mpy, checkpoints)   
         showtrackvsplayer(mpx, mpy, checkpoints)  
@@ -254,14 +265,13 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         # Draw Screen
         drawPlayer(rotationArray, playerRotation)
         showText("Speed ",speed,450,20)
-        showText("Local Time ",(time.strftime("%H:%M:%S", time.localtime())),450,40)
-        showText("Lap Time ",lapTime,450,60)
-        showText("Current Marker",lcheck,450,80)
+        showText("Lap Time ",lapTime,450,40)
+        showText("Best Lap",bestLap,450,60)
         pygame.display.flip()
         clock.tick(30) 
               
 # Run the game
-# precalculations() #This function will loop 0 to 360, step 5, calculate maths values * psize(player size) 
+#This function will loop 0 to 360, step 5, calculate maths values * psize(player size) 
 # and put in an array. optimise for speed, so calculations only done once
 rotationArray = precalculations(rotationArray, psize)
 # Start Game
