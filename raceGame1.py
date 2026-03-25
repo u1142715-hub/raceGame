@@ -220,36 +220,20 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 
         mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
                     
-        # Check to see if first marker has been passed 
-        if markercounter >18:
-                markercounter = 0
-                for init in checkpoints:
-                    init["active"]=0
-                lcheck =0
-                if lapTime < bestLap:
-                    bestLap = lapTime
-                
+        # Check to see if first marker has been passed               
         if checkpoints[0]["active"] == 0 and (mpx - checkpoints[0]["x"])**2 + (mpy - checkpoints[0]["y"])**2 < 75**2:         
             checkpoints[0]["active"] = 1
-            lapTime = float(0.0) 
+            checkpoints[18]["active"] = 0 
             lcheck = 1
             lap_start = time.time()
             markercounter = markercounter + 1
-            
-        # if laptime started update laptime
+
         if lcheck ==1:
-            # Laptime Active
             elapsed = time.time() - lap_start
             hrs = int(elapsed // 3600)
             mins = int((elapsed % 3600) // 60)
             secs = int(elapsed % 60)
             lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
-            
-
-        # if laptime active, alter state of each marker if they passed in correct order
-        # if all markers passed reset laptime when start finish marker passed again
-        # store lap time in a variable, compare with best lap, if better replace best lap with new time
-        if elapsed>1:
             if (checkpoints[markercounter]["active"]) == 0:
                 #check to see if player is on marker now
                 cx = checkpoints[markercounter]["x"]
@@ -257,6 +241,14 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                 if abs(cx-mpx) <75 and abs((cy)-(mpy))<75:
                     checkpoints[markercounter]["active"] = 1
                     markercounter += 1
+                    if markercounter >18:
+                        markercounter = 0
+                        for init in checkpoints[:-1]:
+                            init["active"]=0
+                            lcheck =0
+                            if lapTime < bestLap:
+                                bestLap = lapTime
+                            
 
         # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
         dcheckpoint(mpx, mpy, checkpoints)   
