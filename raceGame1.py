@@ -180,7 +180,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
     cx = checkpoints[0]["x"]
     cy = checkpoints[0]["y"]
     markercounter = 0
-    bestLap = 600
+    bestLap = 55
     hrs = int(bestLap // 3600)
     mins = int((bestLap % 3600) // 60)
     secs = int(bestLap % 60)
