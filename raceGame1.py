@@ -52,15 +52,26 @@ mainmapy = checkpoints[0]["y"]
 # Player Variables
 acceleration = 0
 speed = 0 
+bestLapSpeed = 0
 psize = 15 
 mpx = 3135
 mpy = 3100
+blx=3333
+bly=3333
 playerRotation = 360-45 
+bestLapRotation = 360-90
 rotationArray = {}
 # Time Variables
 clock = pygame.time.Clock()
 lapTime = 0.0 
 
+# Ghost Player
+currentLapPlayer = (
+{"cfx": (mpx),"cfy": (mpy), "current frame":(0), "current speed": (speed), "current rotation": (playerRotation), "active": (1)}    
+)
+bestLapGhost=(
+{"cfx": (blx),"cfy": (bly), "current frame":(0), "current speed": (0), "current rotation": (bestLapRotation), "active": (0)}     
+)
 # Initialization
 pygame.init()
 screen = pygame.display.set_mode((600, 600))
@@ -68,6 +79,16 @@ pygame.display.set_caption("raceGame1")
 background = pygame.Color(white)
 
 # Functions
+# Ghost Player Function
+def updateGhostPlayer(ghostPlayer,mpx,mpy):
+    """
+    @Summary:       Gets players inputs, and stores them in a dictionary
+
+    @Parameters:    To be Decided
+    
+    @Returns:       updated dictionary
+    """
+
 # Calculation Functions
 # Pre_Game Calculations for speed optimisation during play
 def precalculations(rotationArray, psize):
@@ -177,6 +198,7 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
  
 # Main game engine function                   
 def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
+    currentFrame = 0
     cx = checkpoints[0]["x"]
     cy = checkpoints[0]["y"]
     markercounter = 0
@@ -229,6 +251,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
             markercounter = markercounter + 1
 
         if lcheck ==1:
+            currentFrame += 1
             elapsed = time.time() - lap_start
             hrs = int(elapsed // 3600)
             mins = int((elapsed % 3600) // 60)
@@ -243,11 +266,13 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                     markercounter += 1
                     if markercounter >18:
                         markercounter = 0
+                        currentFrame = 0
                         for init in checkpoints[:-1]:
                             init["active"]=0
                             lcheck =0
                             if lapTime < bestLap:
                                 bestLap = lapTime
+                                #update ghost
                             
 
         # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
@@ -259,6 +284,7 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
         showText("Speed ",speed,450,20)
         showText("Lap Time ",lapTime,450,40)
         showText("Best Lap",bestLap,450,60)
+        showText("Current Frame",currentFrame,450,80)
         pygame.display.flip()
         clock.tick(30) 
               
