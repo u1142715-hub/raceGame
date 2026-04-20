@@ -1,10 +1,11 @@
 # Author: Sam Frederiksen 
 # Date Started: 14/03/2026
 # Import necessary libraries
-import pygame
+import pygame # Depending on python environment this may need to be set up using pygame-ce, but you still import pygame
 import sys
 import math
 import time
+import copy
 # Game Colors
 white=pygame.Color(255, 255, 255)
 black=pygame.Color(0, 0, 0)
@@ -33,17 +34,53 @@ def precalculations(rotationArray, psize):
         }
     return rotationArray
  
-def drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen):
+def drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen,bestLapGhost, mpx, mpy):
     """
-       None, however draws 3 circles on screen, one green for front, and two red for back, based on player rotation, and precalculated positions in rotationArray
+    Records the player's state for this frame and draws the player circles.
+    Stores:
+        - speed
+        - rotation
+        - top/left/right circle positions
     """
+
+    # Extract precomputed rotation positions
     tpx, tpy = rotationArray[playerRotation]["top"]
     lpx, lpy = rotationArray[playerRotation]["left"]
     rpx, rpy = rotationArray[playerRotation]["right"]
-    pygame.draw.circle(screen, green, (tpx,tpy), 5) 
-    pygame.draw.circle(screen, red, (lpx,lpy), 5) 
-    pygame.draw.circle(screen, red, (rpx,rpy), 5) 
 
+    # Store this frame's data (APPEND, not overwrite)
+    currentLapPlayer[currentFrame] = {
+        "speed": speed,
+        "pRotation": playerRotation,
+        "mpx": mpx,
+        "mpy": mpy,
+        "top": (tpx, tpy),
+        "left": (lpx, lpy),
+        "right": (rpx, rpy),
+}
+
+
+    # Draw the player circles
+    pygame.draw.circle(screen, green, currentLapPlayer[currentFrame]["top"], 5)
+    pygame.draw.circle(screen, red, currentLapPlayer[currentFrame]["left"], 5)
+    pygame.draw.circle(screen, red, currentLapPlayer[currentFrame]["right"], 5)
+    if bestLapGhost and currentFrame in bestLapGhost:
+        gmpx = bestLapGhost[currentFrame]["mpx"]
+        gmpy = bestLapGhost[currentFrame]["mpy"]
+
+        # Convert ghost world position to screen position
+        gx = gmpx - mpx + 300
+        gy = (10000 - gmpy) - (10000 - mpy) + 300
+
+        # Draw ghost circles using rotationArray
+        grot = bestLapGhost[currentFrame]["pRotation"]
+        gt, gl, gr = rotationArray[grot]["top"], rotationArray[grot]["left"], rotationArray[grot]["right"]
+
+        pygame.draw.circle(screen, green, (gx + (gt[0] - 300), gy + (gt[1] - 300)), 5)
+        pygame.draw.circle(screen, red,   (gx + (gl[0] - 300), gy + (gl[1] - 300)), 5)
+        pygame.draw.circle(screen, red,   (gx + (gr[0] - 300), gy + (gr[1] - 300)), 5)
+
+    
 def showText(name,Value,x,y, screen):
     font = pygame.font.SysFont(None, 20) 
     text_surface = font.render(f"{name}{Value}", True, (black))
@@ -168,7 +205,6 @@ def main():
     rotationArray = precalculations(rotationArray, psize)
     while True:
         screen.fill(background)
-        # Escape Loop if window closed
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
@@ -201,7 +237,6 @@ def main():
             secs = int(elapsed % 60)
             lapTime =f"{hrs:02}:{mins:02}:{secs:02}"
             if (checkpoints[markercounter]["active"]) == 0:
-                #check to see if player is on marker now
                 cx = checkpoints[markercounter]["x"]
                 cy = checkpoints[markercounter]["y"]
                 if abs(cx-mpx) <75 and abs((cy)-(mpy))<75:
@@ -210,6 +245,8 @@ def main():
                     if markercounter >18:
                         markercounter = 0
                         currentFrame = 0
+                        bestLapGhost = copy.deepcopy(currentLapPlayer)
+                        currentLapPlayer = {}
                         for init in checkpoints[:-1]:
                             init["active"]=0
                             lcheck =0
@@ -217,7 +254,7 @@ def main():
                                 bestLap = lapTime
         dcheckpoint(mpx, mpy, checkpoints, screen)   
         showtrackvsplayer(mpx, mpy, checkpoints, screen)  
-        drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen)
+        drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen, bestLapGhost,mpx,mpy)
         showText("Speed ",speed,450,20, screen)
         showText("Lap Time ",lapTime,450,40, screen)
         showText("Best Lap",bestLap,450,60, screen)
