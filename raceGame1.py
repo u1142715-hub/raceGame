@@ -1,96 +1,16 @@
-# raceGame1.py
-# This is a simple racing game implemented in Python using the Pygame library. 
-# The player controls a car that can accelerate, decelerate, and turn left or right. 
-# The game includes a track with checkpoints that the player must pass through to complete laps. 
-# The player's speed and lap time are displayed on the screen. 
-# The game loop handles user input, updates the game state, and renders the game on the screen.
-# Note: This code is a basic implementation and can be expanded with additional features 
-# such as sound effects, more complex track designs, and improved graphics. 
-# Adjust the code as needed to fit your specific requirements and preferences.
 # Author: Sam Frederiksen 
 # Date Started: 14/03/2026
-
 # Import necessary libraries
 import pygame
 import sys
 import math
 import time
-
-# Variables
-# Colors
+# Game Colors
 white=pygame.Color(255, 255, 255)
 black=pygame.Color(0, 0, 0)
 red=pygame.Color(255, 0, 0)
 green=pygame.Color(0, 255, 0)
-
-# Checkpoints
-checkpoints = (
-{"x":(3333),"y":(3333),"active":(0)}, # start finish marker 0
-{"x":(3333),"y":(5000),"active":(0)}, # marker 1
-{"x":(1800),"y":(6000),"active":(0)}, # marker 2
-{"x":(1000),"y":(7500),"active":(0)}, # marker 3
-{"x":(2500),"y":(8500),"active":(0)}, # marker 4
-{"x":(4000),"y":(8500),"active":(0)}, # marker 5
-{"x":(5000),"y":(5500),"active":(0)}, # marker 6
-{"x":(7500),"y":(5000),"active":(0)}, # marker 7
-{"x":(6666),"y":(6666),"active":(0)}, # marker 8
-{"x":(6000),"y":(8500),"active":(0)}, # marker 9
-{"x":(8000),"y":(8000),"active":(0)}, # marker 10
-{"x":(8250),"y":(6000),"active":(0)}, # marker 11
-{"x":(7800),"y":(4000),"active":(0)}, # marker 12
-{"x":(6000),"y":(3000),"active":(0)}, # marker 13
-{"x":(7200),"y":(1800),"active":(0)}, # marker 14
-{"x":(6666),"y":(900),"active":(0)}, # marker 15
-{"x":(3333),"y":(700),"active":(0)}, # marker 16
-{"x":(600),"y":(1500),"active":(0)}, # marker 17
-{"x":(2700),"y":(2700),"active":(0)}, # marker 18
-)
-lcheck = 0 
-mainmapx = checkpoints[0]["x"]
-mainmapy = checkpoints[0]["y"]
-
-# Player Variables
-acceleration = 0
-speed = 0 
-bestLapSpeed = 0
-psize = 15 
-mpx = 3135
-mpy = 3100
-blx=3333
-bly=3333
-playerRotation = 360-45 
-bestLapRotation = 360-90
-rotationArray = {}
-# Time Variables
-clock = pygame.time.Clock()
-lapTime = 0.0 
-
-# Ghost Player
-currentLapPlayer = (
-{"cfx": (mpx),"cfy": (mpy), "current frame":(0), "current speed": (speed), "current rotation": (playerRotation), "active": (1)}    
-)
-bestLapGhost=(
-{"cfx": (blx),"cfy": (bly), "current frame":(0), "current speed": (0), "current rotation": (bestLapRotation), "active": (0)}     
-)
-# Initialization
-pygame.init()
-screen = pygame.display.set_mode((600, 600))
-pygame.display.set_caption("raceGame1")
-background = pygame.Color(white)
-
 # Functions
-# Ghost Player Function
-def updateGhostPlayer(ghostPlayer,mpx,mpy):
-    """
-    @Summary:       Gets players inputs, and stores them in a dictionary
-
-    @Parameters:    To be Decided
-    
-    @Returns:       updated dictionary
-    """
-
-# Calculation Functions
-# Pre_Game Calculations for speed optimisation during play
 def precalculations(rotationArray, psize):
     '''
     @Summary:       Precalculate maths operations before game starts and place them in an array
@@ -113,9 +33,10 @@ def precalculations(rotationArray, psize):
         }
     return rotationArray
  
-# Display Functions
-# Draw Player
-def drawPlayer(rotationArray,playerRotation):
+def drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen):
+    """
+       None, however draws 3 circles on screen, one green for front, and two red for back, based on player rotation, and precalculated positions in rotationArray
+    """
     tpx, tpy = rotationArray[playerRotation]["top"]
     lpx, lpy = rotationArray[playerRotation]["left"]
     rpx, rpy = rotationArray[playerRotation]["right"]
@@ -123,15 +44,13 @@ def drawPlayer(rotationArray,playerRotation):
     pygame.draw.circle(screen, red, (lpx,lpy), 5) 
     pygame.draw.circle(screen, red, (rpx,rpy), 5) 
 
-# Draw On Screen Display      
-def showText(name,Value,x,y):
+def showText(name,Value,x,y, screen):
     font = pygame.font.SysFont(None, 20) 
     text_surface = font.render(f"{name}{Value}", True, (black))
     position = (x, y)
     screen.blit(text_surface, position)
     
-# Draw Minimap
-def dcheckpoint(mpx, mpy, checkpoints):
+def dcheckpoint(mpx, mpy, checkpoints, screen):
     '''
     @Summary:       Draws a minimap for player to easily see where they are in relation to track
     @Parameters:    mpx as integer
@@ -153,17 +72,14 @@ def dcheckpoint(mpx, mpy, checkpoints):
             color=black
         else:
             color=green
-        
         pygame.draw.circle(screen, color, (xcircle, ycircle), 2) 
         pygame.draw.line(screen, black, (lastx, lasty), (xcircle, ycircle), 1) 
         lastx = xcircle 
-        lasty = ycircle
-               
+        lasty = ycircle    
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 1)
     pygame.draw.circle(screen, red, (mpx/scale, (fvar-mpy)/scale), 2) 
 
-# Draw Track   
-def showtrackvsplayer(mpx, mpy, checkpoints):
+def showtrackvsplayer(mpx, mpy, checkpoints, screen):
     '''
     @Summary:       Draws track on screen, based on player center point x,y (player only rotates does not move, track moves instead)
     @Parameters:    mpx as integer, first value, players x coordinate on main scale
@@ -185,9 +101,7 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
                 color = black
             else:
                 color = green
-            
             pygame.draw.circle(screen, color, (xcheck, ycheck), 75) 
-        
         if checkpoint != checkpoints[0]: 
             pygame.draw.line(screen, black, (lastx, lasty), (xcheck, ycheck), 5) 
         lastx = xcheck 
@@ -196,8 +110,51 @@ def showtrackvsplayer(mpx, mpy, checkpoints):
     sfliney = ((10000-checkpoints[0]["y"]) - (10000-mpy) + y) 
     pygame.draw.line(screen, black, (lastx, lasty), (sflinex, sfliney), 5)
  
-# Main game engine function                   
-def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lcheck):
+def main():
+    checkpoints = (
+    {"x":(3333),"y":(3333),"active":(0)}, # start finish marker 0
+    {"x":(3333),"y":(5000),"active":(0)}, # marker 1
+    {"x":(1800),"y":(6000),"active":(0)}, # marker 2
+    {"x":(1000),"y":(7500),"active":(0)}, # marker 3
+    {"x":(2500),"y":(8500),"active":(0)}, # marker 4
+    {"x":(4000),"y":(8500),"active":(0)}, # marker 5
+    {"x":(5000),"y":(5500),"active":(0)}, # marker 6
+    {"x":(7500),"y":(5000),"active":(0)}, # marker 7
+    {"x":(6666),"y":(6666),"active":(0)}, # marker 8
+    {"x":(6000),"y":(8500),"active":(0)}, # marker 9
+    {"x":(8000),"y":(8000),"active":(0)}, # marker 10
+    {"x":(8250),"y":(6000),"active":(0)}, # marker 11
+    {"x":(7800),"y":(4000),"active":(0)}, # marker 12
+    {"x":(6000),"y":(3000),"active":(0)}, # marker 13
+    {"x":(7200),"y":(1800),"active":(0)}, # marker 14
+    {"x":(6666),"y":(900),"active":(0)}, # marker 15
+    {"x":(3333),"y":(700),"active":(0)}, # marker 16
+    {"x":(600),"y":(1500),"active":(0)}, # marker 17
+    {"x":(2700),"y":(2700),"active":(0)}, # marker 18
+    )
+    lcheck = 0 
+    mainmapx = checkpoints[0]["x"]
+    mainmapy = checkpoints[0]["y"]
+    acceleration = 0
+    speed = 0 
+    bestLapSpeed = 0
+    psize = 15 
+    mpx = 3135
+    mpy = 3100
+    blx=3333
+    bly=3333
+    playerRotation = 315
+    bestLapRotation = 270
+    rotationArray = {}
+    # Time Variables
+    clock = pygame.time.Clock()
+    lapTime = 0.0 
+    currentLapPlayer = {}  
+    bestLapGhost= {}     
+    pygame.init()
+    screen = pygame.display.set_mode((600, 600))
+    pygame.display.set_caption("raceGame1")
+    background = pygame.Color(white)
     currentFrame = 0
     cx = checkpoints[0]["x"]
     cy = checkpoints[0]["y"]
@@ -208,24 +165,18 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
     secs = int(bestLap % 60)
     bestLap =f"{hrs:02}:{mins:02}:{secs:02}"
     elapsed = 0
-    
-    # Main Loop
+    rotationArray = precalculations(rotationArray, psize)
     while True:
         screen.fill(background)
         # Escape Loop if window closed
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit(); sys.exit()
-
-        # Check for Key Press
         if pygame.key.get_pressed()[pygame.K_a]:
             playerRotation = (playerRotation - 5) % 360
         elif pygame.key.get_pressed()[pygame.K_d]:
             playerRotation = (playerRotation + 5) % 360 
-        
         playerRotation=playerRotation % 360
-        
-        # Check mouse state
         mouse = pygame.mouse.get_pressed() 
         if mouse[0] is True and speed > 0:     
             acceleration = -1    
@@ -233,23 +184,15 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
             acceleration = 1
         else:
             acceleration = 0 
-        
-        # Calculations
-        # Update Speed 
         speed = speed + acceleration  
-        
-        # Move Player
         mpx = mpx + math.cos(math.radians(playerRotation)) * speed * 0.1 
-        mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1 
-                    
-        # Check to see if first marker has been passed               
+        mpy = mpy - math.sin(math.radians(playerRotation)) * speed * 0.1               
         if checkpoints[0]["active"] == 0 and (mpx - checkpoints[0]["x"])**2 + (mpy - checkpoints[0]["y"])**2 < 75**2:         
             checkpoints[0]["active"] = 1
             checkpoints[18]["active"] = 0 
             lcheck = 1
             lap_start = time.time()
             markercounter = markercounter + 1
-
         if lcheck ==1:
             currentFrame += 1
             elapsed = time.time() - lap_start
@@ -272,25 +215,16 @@ def main(speed, acceleration,mpx, mpy, playerRotation, checkpoints, lapTime, lch
                             lcheck =0
                             if lapTime < bestLap:
                                 bestLap = lapTime
-                                #update ghost
-                            
-
-        # mpx, mpy = movePlayer(speed, playerRotation, mpx, mpy)
-        dcheckpoint(mpx, mpy, checkpoints)   
-        showtrackvsplayer(mpx, mpy, checkpoints)  
-                
-        # Draw Screen
-        drawPlayer(rotationArray, playerRotation)
-        showText("Speed ",speed,450,20)
-        showText("Lap Time ",lapTime,450,40)
-        showText("Best Lap",bestLap,450,60)
-        showText("Current Frame",currentFrame,450,80)
+        dcheckpoint(mpx, mpy, checkpoints, screen)   
+        showtrackvsplayer(mpx, mpy, checkpoints, screen)  
+        drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen)
+        showText("Speed ",speed,450,20, screen)
+        showText("Lap Time ",lapTime,450,40, screen)
+        showText("Best Lap",bestLap,450,60, screen)
+        showText("Current Frame",currentFrame,450,80, screen)
         pygame.display.flip()
         clock.tick(30) 
               
 # Run the game
-#This function will loop 0 to 360, step 5, calculate maths values * psize(player size) 
-# and put in an array. optimise for speed, so calculations only done once
-rotationArray = precalculations(rotationArray, psize)
 # Start Game
-main(speed, acceleration, mpx, mpy, playerRotation, checkpoints, lapTime, lcheck)
+main()
