@@ -1,6 +1,6 @@
 # Author: Sam Frederiksen 
 # Date Started: 14/03/2026
-# Import necessary libraries
+# Import necessary libraries, so far personal best is 41 seconds, approx average speed 340
 import pygame # Depending on python environment this may need to be set up using pygame-ce, but you still import pygame
 import sys
 import math
@@ -196,7 +196,7 @@ def main():
     cx = checkpoints[0]["x"]
     cy = checkpoints[0]["y"]
     markercounter = 0
-    bestLap = 55
+    bestLap = 300
     hrs = int(bestLap // 3600)
     mins = int((bestLap % 3600) // 60)
     secs = int(bestLap % 60)
@@ -245,13 +245,13 @@ def main():
                     if markercounter >18:
                         markercounter = 0
                         currentFrame = 0
-                        bestLapGhost = copy.deepcopy(currentLapPlayer)
+                        if lapTime < bestLap:
+                            bestLap = lapTime
+                            bestLapGhost = copy.deepcopy(currentLapPlayer)
                         currentLapPlayer = {}
                         for init in checkpoints[:-1]:
                             init["active"]=0
                             lcheck =0
-                            if lapTime < bestLap:
-                                bestLap = lapTime
         dcheckpoint(mpx, mpy, checkpoints, screen)   
         showtrackvsplayer(mpx, mpy, checkpoints, screen)  
         drawPlayer(currentLapPlayer, speed, currentFrame, rotationArray, playerRotation, screen, bestLapGhost,mpx,mpy)
