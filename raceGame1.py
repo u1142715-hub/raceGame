@@ -16,6 +16,8 @@ class Player:
         self.speed = 0
         self.currentFrame = 0
         self.acceleration = 0
+        self.currentLapPlayer = {}
+        self.rotationArray = {}
     
     def update(self):
         self.speed = self.speed + self.acceleration  
@@ -42,9 +44,50 @@ class Player:
         elif pygame.key.get_pressed()[pygame.K_d]:
             self.playerRotation = (self.playerRotation + 5) % 360 
         self.playerRotation=self.playerRotation % 360
-class Checkpoints:
-    def __init__(self):
-        pass
+        
+    def drawPlayer1(self, dscreen, bestLapGhost):
+        tpx, tpy = self.rotationArray[self.playerRotation]["top"]
+        lpx, lpy = self.rotationArray[self.playerRotation]["left"]
+        rpx, rpy = self.rotationArray[self.playerRotation]["right"]
+        self.currentLapPlayer[self.currentFrame] = {
+            "speed": self.speed,
+            "pRotation": self.playerRotation,
+            "mpx": self.mpx,
+            "mpy": self.mpy,
+            "top": (tpx, tpy),
+            "left": (lpx, lpy),
+            "right": (rpx, rpy),
+    }
+        pygame.draw.circle(dscreen.screen, dscreen.green, self.currentLapPlayer[self.currentFrame]["top"], 5)
+        pygame.draw.circle(dscreen.screen, dscreen.red, self.currentLapPlayer[self.currentFrame]["left"], 5)
+        pygame.draw.circle(dscreen.screen, dscreen.red, self.currentLapPlayer[self.currentFrame]["right"], 5)
+        if bestLapGhost and self.currentFrame in bestLapGhost:
+            gmpx = bestLapGhost[self.currentFrame]["mpx"]
+            gmpy = bestLapGhost[self.currentFrame]["mpy"]
+            gx = gmpx - self.mpx + 300
+            gy = (10000 - gmpy) - (10000 - self.mpy) + 300
+            grot = bestLapGhost[self.currentFrame]["pRotation"]
+            gt, gl, gr = self.rotationArray[grot]["top"], self.rotationArray[grot]["left"], self.rotationArray[grot]["right"]
+            pygame.draw.circle(dscreen.screen, dscreen.green, (gx + (gt[0] - 300), gy + (gt[1] - 300)), 5)
+            pygame.draw.circle(dscreen.screen, dscreen.red,   (gx + (gl[0] - 300), gy + (gl[1] - 300)), 5)
+            pygame.draw.circle(dscreen.screen, dscreen.red,   (gx + (gr[0] - 300), gy + (gr[1] - 300)), 5)
+    
+    def precalculations(self):
+        x = 300
+        y = 300
+        for angle in range(0, 365, 5):
+            tpx = math.cos(math.radians(angle)) * self.psize + x
+            tpy = math.sin(math.radians(angle)) * self.psize + y
+            lpx = math.cos(math.radians(angle - 90)) * self.psize + x
+            lpy = math.sin(math.radians(angle - 90)) * self.psize + y
+            rpx = math.cos(math.radians(angle + 90)) * self.psize + x
+            rpy = math.sin(math.radians(angle + 90)) * self.psize + y
+            self.rotationArray[angle] = {
+                "top":   (tpx, tpy),
+                "left":  (lpx, lpy),
+                "right": (rpx, rpy)
+            }
+        return self.rotationArray
 class DrawScreen:
     def __init__(self):
         self.screen = pygame.display.set_mode((600, 600))
@@ -52,78 +95,25 @@ class DrawScreen:
         self.black = pygame.Color(0, 0, 0)
         self.red = pygame.Color(255, 0, 0)
         self.green = pygame.Color(0, 255, 0)
+    
+    def hud(self,player, lapTime, bestLap):
+        self.showText("Speed ",player.speed, 450, 20)
+        self.showText("Lap Time ", lapTime, 450, 40)
+        self.showText("Best Lap", bestLap, 450, 60)
+        self.showText("Current Frame", player.currentFrame, 450, 80)
+    
+    def showText(self, name,Value,x,y):  
+        font = pygame.font.SysFont(None, 20) 
+        text_surface = font.render(f"{name}{Value}", True, (self.black))
+        position = (x, y)
+        self.screen.blit(text_surface, position) 
+class Checkpoints:
+    def __init__(self):
+        pass
         
 # Functions
-def precalculations(player, rotationArray):
-    '''
-    @Summary:       Precalculate maths operations before game starts and place them in an array
-    @Parameters:    psize as integer, is used to scale the distance between circles
-    @Returns:       rotationArray as a dictionary, contains rotation angle, calculated x,y positions for all 3 circles based on angle
-    '''
-    x = 300
-    y = 300
-    for angle in range(0, 365, 5):
-        tpx = math.cos(math.radians(angle)) * player.psize + x
-        tpy = math.sin(math.radians(angle)) * player.psize + y
-        lpx = math.cos(math.radians(angle - 90)) * player.psize + x
-        lpy = math.sin(math.radians(angle - 90)) * player.psize + y
-        rpx = math.cos(math.radians(angle + 90)) * player.psize + x
-        rpy = math.sin(math.radians(angle + 90)) * player.psize + y
-        rotationArray[angle] = {
-            "top":   (tpx, tpy),
-            "left":  (lpx, lpy),
-            "right": (rpx, rpy)
-        }
-    return rotationArray
- 
-def drawPlayer(player, currentLapPlayer, rotationArray, dscreen, bestLapGhost):
-    """
-    Records the player's state for this frame and draws the player circles.
-    Stores:
-        - speed
-        - rotation
-        - top/left/right circle positions
-    """
-    tpx, tpy = rotationArray[player.playerRotation]["top"]
-    lpx, lpy = rotationArray[player.playerRotation]["left"]
-    rpx, rpy = rotationArray[player.playerRotation]["right"]
-    currentLapPlayer[player.currentFrame] = {
-        "speed": player.speed,
-        "pRotation": player.playerRotation,
-        "mpx": player.mpx,
-        "mpy": player.mpy,
-        "top": (tpx, tpy),
-        "left": (lpx, lpy),
-        "right": (rpx, rpy),
-}
-    pygame.draw.circle(dscreen.screen, dscreen.green, currentLapPlayer[player.currentFrame]["top"], 5)
-    pygame.draw.circle(dscreen.screen, dscreen.red, currentLapPlayer[player.currentFrame]["left"], 5)
-    pygame.draw.circle(dscreen.screen, dscreen.red, currentLapPlayer[player.currentFrame]["right"], 5)
-    if bestLapGhost and player.currentFrame in bestLapGhost:
-        gmpx = bestLapGhost[player.currentFrame]["mpx"]
-        gmpy = bestLapGhost[player.currentFrame]["mpy"]
-        gx = gmpx - player.mpx + 300
-        gy = (10000 - gmpy) - (10000 - player.mpy) + 300
-        grot = bestLapGhost[player.currentFrame]["pRotation"]
-        gt, gl, gr = rotationArray[grot]["top"], rotationArray[grot]["left"], rotationArray[grot]["right"]
-        pygame.draw.circle(dscreen.screen, dscreen.green, (gx + (gt[0] - 300), gy + (gt[1] - 300)), 5)
-        pygame.draw.circle(dscreen.screen, dscreen.red,   (gx + (gl[0] - 300), gy + (gl[1] - 300)), 5)
-        pygame.draw.circle(dscreen.screen, dscreen.red,   (gx + (gr[0] - 300), gy + (gr[1] - 300)), 5)
-
-def showText(name,Value,x,y, dscreen):
-    font = pygame.font.SysFont(None, 20) 
-    text_surface = font.render(f"{name}{Value}", True, (dscreen.black))
-    position = (x, y)
-    dscreen.screen.blit(text_surface, position)
     
 def dcheckpoint(player, checkpoints, dscreen):
-    '''
-    @Summary:       Draws a minimap for player to easily see where they are in relation to track
-    @Parameters:    mpx as integer
-                    mpy as integer
-                    checkpoints as tuple
-    @Returns:       minimap top left of screen of track and player position
-    '''
     scale = 100 
     fvar = 10000 
     sflinex = ((checkpoints[0]["x"])/scale) 
@@ -146,14 +136,6 @@ def dcheckpoint(player, checkpoints, dscreen):
     pygame.draw.circle(dscreen.screen, dscreen.red, (player.mpx/scale, (fvar-player.mpy)/scale), 2) 
 
 def showtrackvsplayer(player, checkpoints, dscreen):
-    '''
-    @Summary:       Draws track on screen, based on player center point x,y (player only rotates does not move, track moves instead)
-    @Parameters:    mpx as integer, first value, players x coordinate on main scale
-                    mpy as integer, 2nd value, players y coordinate on main scale
-                    checkpoints as tuple, holds x,y position for checkpoints, and third value is to check if player passed through correctly
-    @Returns:       None, however draws 75px diameter circles, color based on test, and only if close enough to player, 
-                    draws line between checkpoints, only if in range of player.
-    '''
     x = 300 
     y = 300 
     lastx = (checkpoints[18]["x"])
@@ -200,10 +182,8 @@ def main():
     {"x":(2700),"y":(2700),"active":(0)}, # marker 18
     )
     lcheck = 0 
-    rotationArray = {}
     clock = pygame.time.Clock()
-    lapTime = 0.0 
-    currentLapPlayer = {}  
+    lapTime = 0.0  
     bestLapGhost= {}     
     pygame.init()
     pygame.display.set_caption("raceGame1")
@@ -216,7 +196,7 @@ def main():
     secs = int(bestLap % 60)
     bestLap =f"{hrs:02}:{mins:02}:{secs:02}"
     elapsed = 0
-    rotationArray = precalculations(player, rotationArray)
+    player.precalculations()
     while True:
         dscreen.screen.fill(dscreen.white)
         player.checkQuit()
@@ -247,18 +227,15 @@ def main():
                         player.currentFrame = 0
                         if lapTime < bestLap:
                             bestLap = lapTime
-                            bestLapGhost = copy.deepcopy(currentLapPlayer)
-                        currentLapPlayer = {}
+                            bestLapGhost = copy.deepcopy(player.currentLapPlayer)
+                        player.currentLapPlayer = {}
                         for init in checkpoints[:-1]:
                             init["active"]=0
                             lcheck =0
         dcheckpoint(player, checkpoints, dscreen)   
         showtrackvsplayer(player, checkpoints, dscreen)  
-        drawPlayer(player, currentLapPlayer, rotationArray, dscreen, bestLapGhost)
-        showText("Speed ",player.speed, 450, 20, dscreen)
-        showText("Lap Time ", lapTime, 450, 40, dscreen)
-        showText("Best Lap", bestLap, 450, 60, dscreen)
-        showText("Current Frame", player.currentFrame, 450, 80, dscreen)
+        player.drawPlayer1(dscreen, bestLapGhost)
+        dscreen.hud(player, lapTime, bestLap)
         pygame.display.flip()
         clock.tick(30) 
               
