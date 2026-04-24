@@ -86,12 +86,12 @@ class DrawScreen:
         pygame.draw.circle(self.screen, self.red, data["left"], 5)
         pygame.draw.circle(self.screen, self.red, data["right"], 5)
             
-    def showtrackvsplayer(self, player, checkpoints):
+    def showtrackvsplayer(self, player, rM):
         x = 300 
         y = 300 
-        lastx = (checkpoints[18]["x"])
-        lasty = (10000-checkpoints[18]["y"]) - (10000-player.mpy) + y 
-        for checkpoint in checkpoints:
+        lastx = (rM.checkpoints[18]["x"])
+        lasty = (10000-rM.checkpoints[18]["y"]) - (10000-player.mpy) + y 
+        for checkpoint in rM.checkpoints:
             xcheck = checkpoint["x"] - player.mpx + x 
             ycheck = (10000-checkpoint["y"]) - (10000-player.mpy) + y
             if 0 <= xcheck <= 600 and 0 <= ycheck <= 600: 
@@ -100,13 +100,22 @@ class DrawScreen:
                 else:
                     color = self.green
                 pygame.draw.circle(self.screen, color, (xcheck, ycheck), 75) 
-            if checkpoint != checkpoints[0]: 
+            if checkpoint != rM.checkpoints[0]: 
                 pygame.draw.line(self.screen, self.black, (lastx, lasty), (xcheck, ycheck), 5) 
             lastx = xcheck 
             lasty = ycheck 
-        sflinex = (checkpoints[0]["x"]) - player.mpx + x 
-        sfliney = ((10000-checkpoints[0]["y"]) - (10000-player.mpy) + y) 
-        pygame.draw.line(self.screen, self.black, (lastx, lasty), (sflinex, sfliney), 5)
+        rM.sflinex = (rM.checkpoints[0]["x"]) - player.mpx + x 
+        rM.sfliney = ((10000-rM.checkpoints[0]["y"]) - (10000-player.mpy) + y) 
+        pygame.draw.line(self.screen, self.black, (lastx, lasty), (rM.sflinex, rM.sfliney), 5)
+        
+    def drawCircleLine(self, rM, player):
+        for action in rM.draw_commands:   
+            if action[0] == "circle":                     
+                pygame.draw.circle(self.screen,*action[1:]) 
+            else:
+                pygame.draw.line(self.screen, *action[1:]) 
+        pygame.draw.line(self.screen, self.black, (rM.lastx, rM.lasty), (rM.sflinex, rM.sfliney), 1)
+        pygame.draw.circle(self.screen, self.red, (player.mpx/rM.scale, (rM.fvar-player.mpy)/rM.scale), 2)
 class InputHandler:   
     def __init__(self):
         pass
@@ -168,8 +177,10 @@ class RaceManager:
         self.sfliney = 0
         self.lastx = 0
         self.lasyy = 0
+        self.draw_commands = []
         
-    def cPoint(self, player, dscreen):
+    def cPoint(self, dscreen):
+        self.draw_commands = []
         self.sflinex = (self.checkpoints[0]["x"])/self.scale
         self.sfliney = ((self.fvar-self.checkpoints[0]["y"])/self.scale) 
         self.lastx = self.sflinex 
@@ -182,12 +193,12 @@ class RaceManager:
                 color=dscreen.black
             else:
                 color=dscreen.green
-            pygame.draw.circle(dscreen.screen, color, (xcircle, ycircle), 2) 
-            pygame.draw.line(dscreen.screen, dscreen.black, (self.lastx, self.lasty), (xcircle, ycircle), 1) 
+            temp = ("circle",color,(xcircle,ycircle),2)
+            self.draw_commands.append((temp)) 
+            temp = ("line",dscreen.black,(self.lastx,self.lasty),(xcircle,ycircle),1)
+            self.draw_commands.append((temp))
             self.lastx = xcircle 
-            self.lasty = ycircle    
-        pygame.draw.line(dscreen.screen, dscreen.black, (self.lastx, self.lasty), (self.sflinex, self.sfliney), 1)
-        pygame.draw.circle(dscreen.screen, dscreen.red, (player.mpx/self.scale, (self.fvar-player.mpy)/self.scale), 2) 
+            self.lasty = ycircle 
         
     def checkRaceStart(self,player):
         if self.checkpoints[0]["active"] == 0 and (player.mpx - self.checkpoints[0]["x"])**2 + (player.mpy - self.checkpoints[0]["y"])**2 < 75**2:         
@@ -261,8 +272,9 @@ def main():
         player.update() 
         rM.checkRaceStart(player) 
         rM.raceMode(player)          
-        rM.cPoint(player, dscreen)   
-        dscreen.showtrackvsplayer(player, rM.checkpoints)  
+        rM.cPoint(dscreen)   
+        dscreen.drawCircleLine(rM, player)
+        dscreen.showtrackvsplayer(player, rM)  
         dscreen.drawPlayer(player)
         dscreen.drawGhost(rM, player)
         dscreen.hud(player, rM.lapTime, rM.bestLap)
